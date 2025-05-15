@@ -150,7 +150,7 @@ void B4Mesh::RecurrentTasks(){
   }
 
   Ask4MissingBlocks();
-  RetransmitTransactions();
+  //RetransmitTransactions();
 }
 
 /**
@@ -440,6 +440,10 @@ void B4Mesh::BroadcastPacket(ApplicationPacket& packet, vector<Ipv4Address> v){
  * Creates a payload of variable size based on TX_PAYLOAD_MIN and TX_PAYLOAD)MAX.
  * Sends payload to RegisterTransaction() which actually creates the transactions,
  * and treats it locally, and sends it to other nodes in group after delay.
+ *
+ * Update:
+ * Change so that only leader can register transactions, and transactions are all
+ * a fixed size.
  */
 void B4Mesh::GenerateTransactions(){
   if (running == false){
@@ -449,26 +453,42 @@ void B4Mesh::GenerateTransactions(){
   numTxsG += 1;
 
   /* Generation of a random variable to define the size of the transaction */
-  Ptr<UniformRandomVariable> size_payload = CreateObject<UniformRandomVariable> ();
-  size_payload->SetAttribute("Min", DoubleValue(TX_PAYLOAD_MIN));
-  size_payload->SetAttribute("Max", DoubleValue(TX_PAYLOAD_MAX));
+//   Ptr<UniformRandomVariable> size_payload = CreateObject<UniformRandomVariable> ();
+//   size_payload->SetAttribute("Min", DoubleValue(TX_PAYLOAD_MIN));
+//   size_payload->SetAttribute("Max", DoubleValue(TX_PAYLOAD_MAX));
+// 
+//   RegisterTransaction(string(size_payload->GetValue(), 'a'+node->GetId()));
+// 
+//   double mean = timeBetweenTxn;
+//   double bound = 0;
+//   Ptr<ExponentialRandomVariable> x = CreateObject<ExponentialRandomVariable> ();
+//   x->SetAttribute("Mean", DoubleValue(mean));
+//   x->SetAttribute("Bound", DoubleValue(bound));
+//   double interval = x->GetValue();
+//   
+//   Simulator::Schedule(Seconds(interval), &B4Mesh::GenerateTransactions, this);
 
-  RegisterTransaction(string(size_payload->GetValue(), 'a'+node->GetId()));
+  // Update to make transactions a fixed size.
+  int fixedPayloadSize = 5000; //bytes. TODO Change this
+  char payloadChar = 'a' + node->GetId();
+  string payload(fixedPayloadSize, payloadChar);
 
-  double mean = timeBetweenTxn;
-  double bound = 0;
-  Ptr<ExponentialRandomVariable> x = CreateObject<ExponentialRandomVariable> ();
-  x->SetAttribute("Mean", DoubleValue(mean));
-  x->SetAttribute("Bound", DoubleValue(bound));
-  double interval = x->GetValue();
+  // Only bother registering transactions if it is a leader
+  if (GetB4MeshOracle(node->GetId())->IsLeader()){
+    RegisterTransaction(payload);
+  }
   
+
+  double interval = 2.0; // TODO Change this.
   Simulator::Schedule(Seconds(interval), &B4Mesh::GenerateTransactions, this);
 }
 
 /**
  * Takes payload from GenerateTransactions(),
  * Create the transaction, treat it with TransactionsTreatment(), ie. add to local mempool.
- * Then schedule call to BroadcastTransaction(), after processing delay based on size of transaction.
+ * Then schedule call to BroadcastTransaction(), after processing delay based on size of transaction
+ *
+ * Update: No more broadcasting transaction..
  */
 void B4Mesh::RegisterTransaction(string payload){
   Transaction t;
@@ -485,8 +505,11 @@ void B4Mesh::RegisterTransaction(string payload){
   float process_time = (t.GetSize() / pow(10,3)); // 1 kbytes/s
   p_t_c_t += process_time;
 
-  Simulator::Schedule(MilliSeconds(process_time),
-        &B4Mesh::BroadcastTransaction, this, t);
+
+  // Don't broadcast anymore since leader just has to register transactions locally.
+  //
+  // Simulator::Schedule(MilliSeconds(process_time),
+  //      &B4Mesh::BroadcastTransaction, this, t);
 }
 
 /**
