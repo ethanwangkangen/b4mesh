@@ -479,7 +479,7 @@ void B4Mesh::GenerateTransactions(){
   }
   
 
-  double interval = 2.0; // TODO Change this.
+  double interval = 2.4; // TODO Change this.
   Simulator::Schedule(Seconds(interval), &B4Mesh::GenerateTransactions, this);
 }
 
@@ -1346,7 +1346,8 @@ void B4Mesh::Ask4ChildlessHashes(){
 
   debug("B4MESH: Ask4ChildlessHashes: Asking childless blocks to nodes:");
 
-  for (auto &dest : GetNewNodes()){
+  //for (auto &dest : GetNewNodes()){
+  for (auto &dest : group){ // 15 May update: seeing if broadcasting to all nodes makes more sense
     debug_suffix.str("");
     debug_suffix << " B4MESH: Ask4ChildlessHashes: Node: " << dest.first << endl;
     debug(debug_suffix.str());
@@ -1355,6 +1356,7 @@ void B4Mesh::Ask4ChildlessHashes(){
   }
 
   BroadcastPacket(packet, groupDestination);
+
 
   Simulator::Schedule(Seconds(6), 
             &B4Mesh::timer_childless_fct, this);

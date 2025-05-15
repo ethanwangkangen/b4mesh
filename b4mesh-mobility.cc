@@ -227,7 +227,7 @@ Vector B4MeshMobility::UpdateLeaderPos(){
       //  MOBILITY MODEL 2 : SPLIT FOLLOWED BY A MERGE (1-2-1)
       debug("Executing Scenario 2");
       
-      if (Simulator::Now().GetSeconds() < (duration/3)-((duration/3)/2) ){
+      if (Simulator::Now().GetSeconds() < 200 ){
         debug("****** 1/3 *******");
         
 	      current_pos.y = 0;
@@ -236,8 +236,8 @@ Vector B4MeshMobility::UpdateLeaderPos(){
         } else {
           current_pos.x = current_pos.x - speed;
         }
-      } else if (Simulator::Now().GetSeconds() > (duration/3)-((duration/3)/2) 
-		      && Simulator::Now().GetSeconds() < (duration/3)*2-((duration/3)/2) ){
+      } else if (Simulator::Now().GetSeconds() > 200
+		      && Simulator::Now().GetSeconds() < 400){
         debug("****** 2/3 *******");
 
 	if (node->GetId() == 0 && direct > 0 ){
@@ -269,7 +269,7 @@ Vector B4MeshMobility::UpdateLeaderPos(){
             current_pos.y = bounds[1]/2;
           }
         }
-      } else if (Simulator::Now().GetSeconds() > (duration/3)*2-((duration/3)/2) ){
+      } else if (Simulator::Now().GetSeconds() > 400){
        debug("****** 3/3 *******");
        
        if (node->GetId() == 0 && direct > 0){
@@ -309,7 +309,7 @@ Vector B4MeshMobility::UpdateLeaderPos(){
     if (scenario == 3){
       debug("Executing Scenario 3");
 
-      if (Simulator::Now().GetSeconds() < (duration/13) ){
+      if (Simulator::Now().GetSeconds() < 200 ){
         debug("****** 1/3 *******");
         current_pos.y = 0;
         if (direct > 0){
@@ -318,7 +318,7 @@ Vector B4MeshMobility::UpdateLeaderPos(){
           current_pos.x -= speed;
         }
       }
-      else if (Simulator::Now().GetSeconds() > (duration/13) && Simulator::Now().GetSeconds() < (duration/2) ){
+      else if (Simulator::Now().GetSeconds() > 200 && Simulator::Now().GetSeconds() < 400){
         debug("****** 2/3 *******");
 
         if (node->GetId() == 0 && direct > 0 ){
@@ -362,7 +362,7 @@ Vector B4MeshMobility::UpdateLeaderPos(){
           }
         }
       }
-      else if (Simulator::Now().GetSeconds() > (duration/2) ){
+      else if (Simulator::Now().GetSeconds() > 400){
         debug("****** 3/3 *******");
         if (node->GetId() == 0 && direct > 0 ){
           current_pos.x += speed;
