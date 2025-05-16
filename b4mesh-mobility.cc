@@ -409,7 +409,7 @@ Vector B4MeshMobility::UpdateLeaderPos(){
     if (scenario == 4){
       //  MOBILITY MODEL 4 : TWO SPLITS FOLLOWED BY TWO MERGE (1-2-3-2-1)
       debug("Executing Scenario 4");
-      if (Simulator::Now().GetSeconds() < (duration/6)-((duration/6)/2)){
+      if (Simulator::Now().GetSeconds() <200){
         debug("****** 1/5 *******");
         current_pos.y = 0;
         if (direct > 0){
@@ -418,7 +418,7 @@ Vector B4MeshMobility::UpdateLeaderPos(){
           current_pos.x = current_pos.x - speed;
         }
       }
-      else if (Simulator::Now().GetSeconds() > (duration/6)-((duration/6)/2) && Simulator::Now().GetSeconds() < ((duration/6)*2)-((duration/6)/4) ){
+      else if (Simulator::Now().GetSeconds() < 400){
         debug("****** 2/5 *******");
         if (node->GetId() == (unsigned int)twothird && direct > 0 ){
           current_pos.x = current_pos.x + speed;
@@ -453,7 +453,7 @@ Vector B4MeshMobility::UpdateLeaderPos(){
           }
         }
       }
-      else if (Simulator::Now().GetSeconds() > ((duration/6)*2)-((duration/6)/4) && Simulator::Now().GetSeconds() < ((duration/6)*3)-((duration/6)/4)){
+      else if (Simulator::Now().GetSeconds() < 600){
         debug("****** 3/5 *******");
         if (node->GetId() == (unsigned int)twothird && direct > 0 ){
           current_pos.x = current_pos.x + speed;
@@ -496,7 +496,7 @@ Vector B4MeshMobility::UpdateLeaderPos(){
            }
         }
       }
-      else if (Simulator::Now().GetSeconds() > ((duration/6)*3)-((duration/6)/4) && Simulator::Now().GetSeconds() < ((duration/6)*4)-((duration/6)/4) ){
+      else if (Simulator::Now().GetSeconds() < 800){
         debug("****** 4/5 *******");
         if (node->GetId() == (unsigned int)twothird && direct > 0 ){
           current_pos.x = current_pos.x + speed;
@@ -539,7 +539,7 @@ Vector B4MeshMobility::UpdateLeaderPos(){
           }
         }
       }
-      else if ( Simulator::Now().GetSeconds() > ((duration/6)*4)-((duration/6)/4) && Simulator::Now().GetSeconds() < duration){
+      else {
         debug("****** 5/5 *******");
         if (node->GetId() == (unsigned int)twothird && direct > 0){
           current_pos.x += speed;
