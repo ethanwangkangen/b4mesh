@@ -401,9 +401,6 @@ void B4Mesh::SendPacket(ApplicationPacket& packet, Ipv4Address ip, bool schedule
   // For tracing purposes: Ethan added
   sentPacketSizeTotal += packet.GetSize(); // In B
 
-  if (packet.GetService() == ApplicationPacket::TRANSACTION) {
-    sentTxnPacketSize += packet.GetSize(); // In B
-  }
 
   // Open the sending socket
   TypeId tid = TypeId::LookupByName("ns3::UdpSocketFactory");
@@ -435,6 +432,23 @@ void B4Mesh::BroadcastPacket(ApplicationPacket& packet, vector<Ipv4Address> v){
     if(GetIpAddress() != ip)
     SendPacket(packet, ip, false);
   }
+   return;
+  
+  // Unused.
+  if (!running) return;
+
+  Ptr<Packet> pkt = Create<Packet>((const uint8_t*)(packet.Serialize().data()), packet.GetSize());
+  sentPacketSizeTotal += packet.GetSize();
+
+  TypeId tid = TypeId::LookupByName("ns3::UdpSocketFactory");
+  Ptr<Socket> source = Socket::CreateSocket(node, tid);
+  source->SetAllowBroadcast(true);
+
+  InetSocketAddress broadcastAddr = InetSocketAddress(Ipv4Address("255.255.255.255"), 80);
+  source->Connect(broadcastAddr);
+  source->Send(pkt);
+  source->Close();
+
 }
 
 //  ******* TRANSACTION RELATED METHODS **************** 
@@ -455,7 +469,7 @@ void B4Mesh::GenerateTransactions(){
     return;
   }
 
-  numTxsG += 1;
+  //numTxsG += 1;
 
   /* Generation of a random variable to define the size of the transaction */
 //   Ptr<UniformRandomVariable> size_payload = CreateObject<UniformRandomVariable> ();
@@ -474,13 +488,15 @@ void B4Mesh::GenerateTransactions(){
 //   Simulator::Schedule(Seconds(interval), &B4Mesh::GenerateTransactions, this);
 
   // Update to make transactions a fixed size.
-  int fixedPayloadSize = 5000; //bytes. TODO Change this
+  int fixedPayloadSize = TX_MEAN_SIZE; //bytes. TODO Change this
   char payloadChar = 'a' + node->GetId();
   string payload(fixedPayloadSize, payloadChar);
 
   // Only bother registering transactions if it is a leader
   if (GetB4MeshOracle(node->GetId())->IsLeader()){
     RegisterTransaction(payload);
+    numTxsG +=1;
+    sentTxnPacketSize += TX_MEAN_SIZE;
   }
 
   Simulator::Schedule(Seconds(timeBetweenTxn), &B4Mesh::GenerateTransactions, this);
@@ -798,11 +814,11 @@ void B4Mesh::SendBranchRequest(){
         
         // Limit the number of requests that can be sent. Modified to be higher than original.
         if (GetB4MeshOracle(node->GetId())->IsLeader() == true){
-          if (request_count == ceil(double(peers.size()))){  // number of branch request to different nodes. originally /double(4)
+          if (request_count == 6){  // number of branch request to different nodes. originally /double(4)
             goto cntt;
           }
         } else {
-          if (request_count == ceil(double(peers.size()))){  // number of branch request to different nodes. originally /double(8)
+          if (request_count == 6){  // number of branch request to different nodes. originally /double(8)
             goto cntt;
           }
         }
@@ -2287,7 +2303,7 @@ void B4Mesh::GenerateResults(){
   output_file10 << "********* PACKET RELATED PERFORMANCES *****************" << endl;
   output_file10 << "B4Mesh: Size of all packets sent: " << sentPacketSizeTotal << endl;
   output_file10 << "B4MeshOracle: Size of packets sent for consensus: " << GetB4MeshOracle(node->GetId())->sentPacketSizeTotalConsensus << endl;
-  output_file10 << "B4Mesh: Size of transaction packets sent: " << sentTxnPacketSize << endl;
+  output_file10 << "B4Mesh: Size of transactions generated: " << sentTxnPacketSize << endl;
   
 
   output_file10 << "********* BLOCKGRAPH RELATED PERFORMANCES *****************" << endl;

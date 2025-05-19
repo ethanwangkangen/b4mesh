@@ -11,7 +11,7 @@ using namespace std;
 int main(int argc, char *argv[]) {
 
 // Default values
-  int nNodes = 10;  // Number of nodes
+  int nNodes = 12;  // Number of nodes
   int sTime = 600;  // Time of simulation
   double txGen = 3;  // Mean time in seconds between the generation of two txs
   int mMobility = 1;  // Mobility model 

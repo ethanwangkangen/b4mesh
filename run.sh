@@ -5,7 +5,7 @@ sudo chmod 777 ./results
 sudo chmod 777 ./results/*
 sudo ../../build/scratch/b4mesh/./ns3.44-main-default  "$@" > traces.txt
 cd scripts
-sudo ./creategraphs 10
+sudo ./creategraphs 12
 cd ..
 #xdg-open results
 #xdg-open traces.txt
