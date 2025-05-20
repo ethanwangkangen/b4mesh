@@ -2,12 +2,12 @@
 #define B4MESH_CONFIGS
 
 // Transaction Payload size
-#define TX_PAYLOAD_MIN 5000
-#define TX_PAYLOAD_MAX 5000
-#define TX_MEAN_SIZE 5000
+#define TX_PAYLOAD_MIN 55000
+#define TX_PAYLOAD_MAX 55000
+#define TX_MEAN_SIZE 40000
 
 // Minimum time to propagate a block before creating a new one
-#define TIME_BTW_BLOCK 15
+#define TIME_BTW_BLOCK 40
 
 // Number of transactions allowed in a block
 #define MAX_SIZE_BLOCK 100  // In KB

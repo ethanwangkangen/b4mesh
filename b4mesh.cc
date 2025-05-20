@@ -495,8 +495,7 @@ void B4Mesh::GenerateTransactions(){
   // Only bother registering transactions if it is a leader
   if (GetB4MeshOracle(node->GetId())->IsLeader()){
     RegisterTransaction(payload);
-    numTxsG +=1;
-    sentTxnPacketSize += TX_MEAN_SIZE;
+
   }
 
   Simulator::Schedule(Seconds(timeBetweenTxn), &B4Mesh::GenerateTransactions, this);
@@ -1648,7 +1647,7 @@ void B4Mesh::SendBranch4Sync(const string& msg_payload, Ipv4Address destAddr){
  */
 bool B4Mesh::TestPendingTxs(){
   if ((int)Simulator::Now().GetSeconds() - lastBlock_creation_time > TIME_BTW_BLOCK){
-    if ( SizeMempoolBytes()/1000 > MIN_SIZE_BLOCK){
+    if (SizeMempoolBytes()/1000 > MIN_SIZE_BLOCK){
       debug(" TestPendingTxs: Enough txs to create a block.");
       return true;
     } else {
@@ -1664,6 +1663,8 @@ bool B4Mesh::TestPendingTxs(){
 /**
  * Returns the transactions from mempool with smallest timestamp. 
  * For block creation by leader.
+ * 
+ * 20 May: modified to only select a single transaction.
  */
 vector<Transaction> B4Mesh::SelectTransactions(){
   vector<Transaction> transactions;
@@ -1682,11 +1683,13 @@ vector<Transaction> B4Mesh::SelectTransactions(){
       }
     }
     if (min_ts.first != "0"){
-      // debug_suffix.str("");
-      // debug_suffix << "SelectTransactions : Getting tx: " << min_ts.first << " with time stamp: " << min_ts.second << endl;
-      // debug(debug_suffix.str());
+      debug_suffix.str("");
+      debug_suffix << "SelectTransactions : Getting tx: " << min_ts.first << " with time stamp: " << min_ts.second << endl;
+      debug(debug_suffix.str());
 
       transactions.push_back(txn_mempool[min_ts.first]);
+      // added this to limit transactions to one
+      return transactions;
     } else {
       break;
     }
@@ -1839,7 +1842,9 @@ Block B4Mesh::GenerateRegularBlock(Block &block){
   debug(" GenerateRegularBlock: Creating a Regular Block ");
 
   vector<string> p_block = vector <string> ();
-  vector<Transaction> transactions = SelectTransactions();
+  vector<Transaction> transactions = SelectTransactions(); // This should only be a single transaction
+  numTxsG +=1;
+  sentTxnPacketSize += TX_MEAN_SIZE;
 
   if (blockgraph.GetChildlessBlockList().size() > 1 ){
     if (IsMergeInProcess()){
@@ -2345,6 +2350,24 @@ void B4Mesh::GenerateResults(){
   output_file10 << TxRep << std::endl;
   output_file10.close();
 
+  ofstream output_file11;
+  char filename11[50];
+  sprintf(filename11, "Traces/Performances-total.txt");
+  output_file11.open(filename11, ios::app);
+  output_file11 << std::fixed << std::setprecision(2);
+
+  //output_file11 << "Node: " << node->GetId() << endl;
+  output_file11 << sentPacketSizeTotal << endl;
+  output_file11 << GetB4MeshOracle(node->GetId())->sentPacketSizeTotalConsensus << endl;
+  output_file11 << sentTxnPacketSize << endl;
+  if (endmergetime - startmergetime < 0) {
+    output_file11 << "0" << endl;
+  } else {
+    output_file11 << endmergetime - startmergetime << endl;
+  }
+  
+  output_file11.close();
+
 }
 
 void B4Mesh::PerformancesB4Mesh(){
@@ -2373,8 +2396,8 @@ void B4Mesh::PerformancesB4Mesh(){
 
 
 void B4Mesh::debug(string suffix){
-  std::cout << Simulator::Now().GetSeconds() << "s: B4Mesh : Node " << node->GetId() <<
-      " : " << suffix << endl;
-  debug_suffix.str("");
+  // std::cout << Simulator::Now().GetSeconds() << "s: B4Mesh : Node " << node->GetId() <<
+  //     " : " << suffix << endl;
+  // debug_suffix.str("");
  
 }
