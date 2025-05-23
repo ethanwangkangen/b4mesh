@@ -1,5 +1,5 @@
-rm Traces/Performances-total.txt
-touch Traces/Perforances-total.txt
+sudo rm Traces/Performances-total.txt
+sudo touch Traces/Perforances-total.txt
 sudo chmod 777 traces.txt
 sudo chmod 777 ./Traces
 sudo chmod 777 ./Traces/*

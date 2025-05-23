@@ -412,13 +412,13 @@ void B4Mesh::SendPacket(ApplicationPacket& packet, Ipv4Address ip, bool schedule
   source->Close();
 
   if (res > 0){
-    // debug_suffix.str("");
-    // debug_suffix << GetIpAddress() << " sends a packet of size " << pkt->GetSize() << " to " << ip << endl;
-    // debug(debug_suffix.str());
+    debug_suffix.str("");
+    debug_suffix << GetIpAddress() << " sends a packet of size " << pkt->GetSize() << " to " << ip << endl;
+    debug(debug_suffix.str());
   } else{
-    // debug_suffix.str("");
-    // debug_suffix << GetIpAddress() << " failed to send a packet of size " << pkt->GetSize() << " to " << ip << endl;
-    // debug(debug_suffix.str());
+    debug_suffix.str("");
+    debug_suffix << GetIpAddress() << " failed to send a packet of size " << pkt->GetSize() << " to " << ip << endl;
+    debug(debug_suffix.str());
   }
 }
 
@@ -693,6 +693,13 @@ void B4Mesh::BlockTreatment(Block b){
 
         StartSyncProcedure(b.GetTransactions());
         AddBlockToBlockgraph(b);
+	
+	// 23 May: Added this.
+	// Edge case encountered when a merge block itself is a parent of another block that is already
+	// waiting for it. Need to update waiting list here as well.
+	if (block_waiting_list.size() >0) {
+          UpdateWaitingList();
+	}
       } else { // The block is a regular block, check if can add it to blockgraph
         
         // Checking that the parents of this block are in the BG:
@@ -2364,7 +2371,7 @@ void B4Mesh::GenerateResults(){
     output_file11 << "0" << endl;
   } else {
     output_file11 << endmergetime - startmergetime << endl;
-  }
+   }
   
   output_file11.close();
 
@@ -2396,8 +2403,8 @@ void B4Mesh::PerformancesB4Mesh(){
 
 
 void B4Mesh::debug(string suffix){
-  // std::cout << Simulator::Now().GetSeconds() << "s: B4Mesh : Node " << node->GetId() <<
-  //     " : " << suffix << endl;
-  // debug_suffix.str("");
+   std::cout << Simulator::Now().GetSeconds() << "s: B4Mesh : Node " << node->GetId() <<
+       " : " << suffix << endl;
+   debug_suffix.str("");
  
 }

@@ -47,27 +47,27 @@ void B4MeshMobility::SetUp(Ptr<Node> node, vector<Ipv4Address> peers, int sTime,
     // Set up for Constant Position Mobility Model
     if (scenario == 1){
       this->leaderIdMod = numNodes;
-      this->bounds = vector<int>({-200,-200, 200, 200,});
+      this->bounds = vector<int>({-1000,-1000, 1000, 1000,});
     } else if (scenario == 2){
-      this->leaderIdMod = ceil((float)numNodes/(float)2);
-      this->bounds = vector<int>({-250,-250, 250, 250,});
+      this->leaderIdMod = ceil((float)numNodes/(float)6);
+      this->bounds = vector<int>({-1000,-1000, 1000, 1000,});
     } else if (scenario == 3){
       this->leaderIdMod = ceil((float)numNodes/(float)3);
       this->onethird = ceil((float)numNodes/(float)3);
       this->twothird = onethird*2;
       if (numNodes > 25){
-        this->bounds = vector<int>({-350,-350, 350, 350,});
+        this->bounds = vector<int>({-1000,-1000, 1000, 1000,});
       } else {
-        this->bounds = vector<int>({-300,-300, 300, 300,});
+        this->bounds = vector<int>({-1000,-1000, 1000, 1000,});
       }
     } else if (scenario == 4){
       this->leaderIdMod = ceil((float)numNodes/(float)3);
       this->onethird = ceil((float)numNodes/(float)3);
       this->twothird = onethird*2;
       if (numNodes > 25){
-        this->bounds = vector<int>({-350,-350, 350, 350,});
+        this->bounds = vector<int>({-1000,-1000, 1000, 1000,});
       } else {
-        this->bounds = vector<int>({-300,-300, 300, 300,});
+        this->bounds = vector<int>({-1000,-1000, 1000, 1000,});
       }
     }
 
