@@ -58,19 +58,14 @@ class Experiment{
     void CreateAddresses();
 
     /**
-     * Setup applications into the nodes.
+     * Setup blockgraph applications into the nodes.
      */
-    void CreateApplications();
+    void CreateBlockgraph();
 
     /**
      * Setup the consensus application into the nodes.
      */
     void CreateConsensus();
-
-    /**
-     * Create the consensus application base in the oracle into the nodes.
-     */
-    void CreateOracleConsensus();
 
     /**
      * Setup the mobility model for b4mesh as an application that changes nodes

@@ -49,7 +49,7 @@ void B4MeshMobility::SetUp(Ptr<Node> node, vector<Ipv4Address> peers, int sTime,
       this->leaderIdMod = numNodes;
       this->bounds = vector<int>({-1000,-1000, 1000, 1000,});
     } else if (scenario == 2){
-      this->leaderIdMod = ceil((float)numNodes/(float)6);
+      this->leaderIdMod = ceil((float)numNodes/(float)2);
       this->bounds = vector<int>({-1000,-1000, 1000, 1000,});
     } else if (scenario == 3){
       this->leaderIdMod = ceil((float)numNodes/(float)3);
@@ -72,7 +72,7 @@ void B4MeshMobility::SetUp(Ptr<Node> node, vector<Ipv4Address> peers, int sTime,
     }
 
     debug_suffix.str("");
-    debug_suffix << " Mobility Scenario: " << scenario << " Speed: " << speed << " Update possition interval : " << moveInterval << endl;
+    debug_suffix << " Mobility Scenario: " << scenario << " Speed: " << speed << " Update position interval : " << moveInterval << endl;
     debug(debug_suffix.str());
 
   } else if (this->mMob == rWalk2){
@@ -91,23 +91,6 @@ void B4MeshMobility::SetUp(Ptr<Node> node, vector<Ipv4Address> peers, int sTime,
 
   Config::Connect ("/NodeList/*/$ns3::MobilityModel/CourseChange",
                     MakeCallback (&B4MeshMobility::CourseChange, this));
-  }
-
-
-Ptr<B4MeshOracle> B4MeshMobility::GetB4MeshOracle(int nodeId){
-
-  Ptr<Application> app = ns3::NodeList::GetNode(nodeId)->GetApplication(0);
-  Ptr<B4MeshOracle> oracle = app->GetObject<B4MeshOracle>();
-  return oracle;
-
-}
-
-Ptr<B4Mesh> B4MeshMobility::GetB4MeshOf(int nodeId){
-
-  Ptr<Application> app = ns3::NodeList::GetNode(nodeId)->GetApplication(1);
-  Ptr<B4Mesh> b4mesh = app->GetObject<B4Mesh>();
-  return b4mesh;
-
 }
 
 /**
@@ -137,17 +120,7 @@ void B4MeshMobility::StopApplication(){
   running = false;
 }
 
-Ipv4Address B4MeshMobility::GetIpAddress(){
-  Ptr<Ipv4> ipv4 = node->GetObject<Ipv4>();
-  return ipv4->GetAddress(1, 0).GetLocal();
-}
 
-void B4MeshMobility::CourseChange(string context, Ptr<const MobilityModel> mobility){
-  Vector pos = mobility->GetPosition();
-  Vector vel = mobility->GetVelocity();
-  // cout << Simulator::Now().GetSeconds() << " Node: " << node->GetId() <<", model =" << mobility->GetTypeId() << ", POS: x =" << pos.x << ", y =" << pos.y
-  //      << ", z =" << pos.z << "; VEL: " << vel.x << ", y =" << vel.y << ", z =" << vel.z << endl;
-}
 // ************ Constant Position Model ****************
 
 /**
@@ -575,10 +548,14 @@ Vector B4MeshMobility::UpdateLeaderPos(){
         }
       }
     }
-  mob->SetPosition(current_pos);
+
+  mob->SetPosition(current_pos); // Update position for NS3 Mobility Model
   return current_pos;
 }
 
+/**
+ * Change left/right direction if hit bounds of the grid.
+ */
 Vector B4MeshMobility::UpdateDirection(){
     Ptr<MobilityModel> mob = node->GetObject<MobilityModel>();
     Vector current_pos = mob->GetPosition();
@@ -635,7 +612,7 @@ void B4MeshMobility::UpdateFollowersScn1(Vector leader_pos){
     new_position.x = current_pos.x;
     new_position.y = current_pos.y;
     debug_suffix.str("");
-    debug_suffix << " Updating follower's " << i << " possition. New pos in X is : " << new_position.x << " New pos in Y is :" << new_position.y << endl;
+    debug_suffix << " Updating follower's " << i << " position. New pos in X is : " << new_position.x << " New pos in Y is :" << new_position.y << endl;
     debug(debug_suffix.str());
     mob->SetPosition(new_position);
   }
@@ -654,7 +631,7 @@ void B4MeshMobility::UpdateFollowersScn2(Vector leader_pos){
       new_position.x = current_pos.x;
       new_position.y = current_pos.y;
       debug_suffix.str("");
-      debug_suffix << " Updating follower's " << i << " possition. New pos in X is : " << new_position.x << " New pos in Y is :" << new_position.y << endl;
+      debug_suffix << " Updating follower's " << i << " position. New pos in X is : " << new_position.x << " New pos in Y is :" << new_position.y << endl;
       debug(debug_suffix.str());
       mob->SetPosition(new_position);
     }
@@ -670,7 +647,7 @@ void B4MeshMobility::UpdateFollowersScn2(Vector leader_pos){
       new_position.x = current_pos.x;
       new_position.y = current_pos.y;
       debug_suffix.str("");
-      debug_suffix << " Updating follower's " << i << " possition. New pos in X is : " << new_position.x << " New pos in Y is :" << new_position.y << endl;
+      debug_suffix << " Updating follower's " << i << " position. New pos in X is : " << new_position.x << " New pos in Y is :" << new_position.y << endl;
       debug(debug_suffix.str());
       mob->SetPosition(new_position);
     }
@@ -731,7 +708,8 @@ void B4MeshMobility::UpdateFollowersScn3(Vector leader_pos){
 
 
 /**
- *
+ * Automatically called through callback function, when OLSR routing table is changed.
+ * 
  */
 void B4MeshMobility::TableChange(uint32_t size){
   if (running == false){
@@ -763,24 +741,28 @@ void B4MeshMobility::TableChange(uint32_t size){
   if (groupCandidate == group){
     return;
   } else {
-    CheckGroupChangement(groupCandidate);
+    CheckGroupChange(groupCandidate);
   }
 
 }
 
-void B4MeshMobility::CheckGroupChangement(vector<pair<int, Ipv4Address>> groupCandidate){
+/**
+ * Check if group change is significant enough by calling CalculDiffBtwGroups().
+ * Only if change is significant, then call ChangeGroup().
+ */
+void B4MeshMobility::CheckGroupChange(vector<pair<int, Ipv4Address>> groupCandidate){
   /* toleranceTime is a defined number that represent the seconds passed since the last
    * change in the network topology
    */
   if(Simulator::Now().GetSeconds() - time_change < TOPOLOGY_TOLERANCE_TIME ){
     // Check if the change is considerable before notifying
-    debug(" CheckGroupChangement: The network topopolgy has changed again.\nChecking if it is a considerable change...");
+    debug(" CheckGroupChange: The network topopolgy has changed again.\nChecking if it is a considerable change...");
     bool do_change = CalculDiffBtwGroups(groupCandidate);
     if (do_change){
       ChangeGroup(groupCandidate);
     } else {
       // Not enough difference btw groups to say that is a true change
-      debug(" CheckGroupChangement: The difference between groupes was less than one element. Ignoring this change. ");
+      debug(" CheckGroupChange: The difference between groupes was less than one element. Ignoring this change. ");
       return;
     }
   } else {
@@ -788,6 +770,9 @@ void B4MeshMobility::CheckGroupChangement(vector<pair<int, Ipv4Address>> groupCa
   }
 }
 
+/**
+ * Inform Blockgraph and Consneus modules on the new Group
+ */
 void B4MeshMobility::ChangeGroup(vector<pair<int, Ipv4Address>> groupCandidate){
 
   debug(" ChangeGroup: Change in the network topology detected ");
@@ -806,7 +791,7 @@ void B4MeshMobility::ChangeGroup(vector<pair<int, Ipv4Address>> groupCandidate){
   // Updating groupId
   groupId  = CalculeGroupId(groupCandidate);
   //Detect the nature of the changement in the topology
-  int natchange = DetecteNatureChange(group, groupCandidate); 
+  int natchange = DetectNatureChange(group, groupCandidate); 
   // Updating group
   group.clear();
   group = groupCandidate;
@@ -872,7 +857,7 @@ string B4MeshMobility::CalculeGroupId (vector<pair<int,Ipv4Address>> grp){
   return newHash;
 }
 
-int B4MeshMobility::DetecteNatureChange(vector<pair<int, Ipv4Address>> oldgroup, vector<pair<int, Ipv4Address>> newgroup){
+int B4MeshMobility::DetectNatureChange(vector<pair<int, Ipv4Address>> oldgroup, vector<pair<int, Ipv4Address>> newgroup){
 
   if (newgroup == oldgroup) return NONE;
 
@@ -885,6 +870,34 @@ int B4MeshMobility::DetecteNatureChange(vector<pair<int, Ipv4Address>> oldgroup,
   if ((uint32_t)common_count == newgroup.size()) return SPLIT;
   if ((uint32_t)common_count == oldgroup.size()) return MERGE;
   else return ARBITRARY;
+}
+
+Ptr<B4MeshOracle> B4MeshMobility::GetB4MeshOracle(int nodeId){
+
+  Ptr<Application> app = ns3::NodeList::GetNode(nodeId)->GetApplication(0);
+  Ptr<B4MeshOracle> oracle = app->GetObject<B4MeshOracle>();
+  return oracle;
+
+}
+
+Ptr<B4Mesh> B4MeshMobility::GetB4MeshOf(int nodeId){
+
+  Ptr<Application> app = ns3::NodeList::GetNode(nodeId)->GetApplication(1);
+  Ptr<B4Mesh> b4mesh = app->GetObject<B4Mesh>();
+  return b4mesh;
+
+}
+
+Ipv4Address B4MeshMobility::GetIpAddress(){
+  Ptr<Ipv4> ipv4 = node->GetObject<Ipv4>();
+  return ipv4->GetAddress(1, 0).GetLocal();
+}
+
+void B4MeshMobility::CourseChange(string context, Ptr<const MobilityModel> mobility){
+  Vector pos = mobility->GetPosition();
+  Vector vel = mobility->GetVelocity();
+  // cout << Simulator::Now().GetSeconds() << " Node: " << node->GetId() <<", model =" << mobility->GetTypeId() << ", POS: x =" << pos.x << ", y =" << pos.y
+  //      << ", z =" << pos.z << "; VEL: " << vel.x << ", y =" << vel.y << ", z =" << vel.z << endl;
 }
 
 void B4MeshMobility::debug(string suffix){

@@ -468,21 +468,13 @@ B4MeshOracle::append_entries_ack_t B4MeshOracle::ProcessAppendEntries(string dat
     debug(debug_suffix.str());
 
     //Log realignment, if applicable
-    if (log.size()>0) {
-    debug_suffix << log[LastLogIndex()].second;
-    debug(debug_suffix.str());
-
-    debug_suffix << groups.count(log[LastLogIndex()].second);
-    debug(debug_suffix.str()); 
-    }
-
     if (log.size() > 0 && groups.count(log[LastLogIndex()].second) > 0 
 		    || log.size()>0 && entries.msg_type == APPEND_ENTRY_CONF ){ //added this line. 26/05. trying.
       debug("Log realignment");
       for (int i=LastLogIndex(); i<entries.prev_log_index; ++i){
         string hash = GetCurrentGroup();
         log.push_back(make_pair(current_term, hash));
-	debug("Push back");
+	      debug("Push back");
       }
     }
 
@@ -531,11 +523,11 @@ B4MeshOracle::append_entries_ack_t B4MeshOracle::ProcessAppendEntries(string dat
         debug(debug_suffix.str());
         groups[new_group.first] = new_group.second; // add {[group_hash -> [group]]}
       } else {
-        debug("Config change appending failed somehow");
-	debug_suffix << entries.prev_log_index;
-	debug(debug_suffix.str());
-	debug_suffix << LastLogIndex();
-	debug(debug_suffix.str());
+        debug("Config change appending failed somehow"); // This shouldn't happen anymore.
+        // debug_suffix << entries.prev_log_index;
+        // debug(debug_suffix.str());
+        // debug_suffix << LastLogIndex();
+        // debug(debug_suffix.str());
         ret.success = false;
         return ret;
       }
@@ -988,7 +980,7 @@ void B4MeshOracle::SetMajority() {
   majority = current_group.size()/2;
 }
 
-// Invoked on ALL(??) nodes by the upper layer node discovery protocol?
+// Invoked on ALL nodes by the Group Discovery module.
 // Clear pending_groups -> why??
 // Form a new group change sequence with the new group
 // Group change sequence: either a simple one element vector (for split/merge), 
@@ -1247,7 +1239,6 @@ void B4MeshOracle::debug(string suffix){
    " : " << suffix << endl;
    debug_suffix.str("");
 }
-
 
 
 

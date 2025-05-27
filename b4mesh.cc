@@ -100,6 +100,8 @@ void B4Mesh::SetUp(Ptr<Node> node, vector<Ipv4Address> peers, float timeBetweenT
   this->node = node;
   this->timeBetweenTxn = timeBetweenTxn;
 
+  afterMerge=false;
+
   if (!recv_sock){
     // Open the receiving socket
     TypeId tid = TypeId::LookupByName("ns3::UdpSocketFactory");
@@ -1066,7 +1068,8 @@ void B4Mesh::AddBlockToBlockgraph(Block b){
 
   // trace purpose 
   if (missing_childless_hashes.size() == 0 && isMissing == true){
-    endmergetime = Simulator::Now().GetSeconds();
+    // endmergetime = Simulator::Now().GetSeconds();
+    // debug("Merge has been completed");
     createBlock = true;
   }
 
@@ -1085,6 +1088,23 @@ void B4Mesh::AddBlockToBlockgraph(Block b){
   blockgraph.AddBlock(b);
   // TRACE << "ADD_BLOCK" << " " << b.GetHash().data() << endl;
   // For traces purposes
+
+  // For convergence time logging
+  vector<string> parentHashes = b.GetParents();
+  string h;
+  for (auto &hash : parentHashes){
+    string groupId = blockgraph.GetGroupId(hash);
+    h = hash;
+  }
+
+  if (groupId == startGroupId && afterMerge == true && blockgraph.GetBlock(h).GetTimestamp() < startsplittime
+      && blockgraph.GetBlock(h).GetTimestamp() != -1){
+    endmergetime = Simulator::Now().GetSeconds();
+    afterMerge=false;
+    debug("Merge has been completed");
+    debug_suffix << blockgraph.GetBlock(h).GetTimestamp() << " " <<startsplittime;
+    debug(debug_suffix.str());
+  }
   
   CreateGraph(b);
 }
@@ -1195,7 +1215,7 @@ void B4Mesh::SendBlockTo(string hash_p, Ipv4Address destAddr){
 /**
  * Function called by Group Discovery Module, ie. b4mesh-mobility, to inform the app of the new group.
  * natChange = MERGE/SPLIT..
- * Schedules a call to UpdateTopologyInfo() after 5 seconds.
+ * Schedules a call to UpdateTopologyInfo() after 1 seconds.
  */
 void B4Mesh::ReceiveNewTopologyInfo(pair<string, vector<pair<int, Ipv4Address>>> new_group, int natChange){
   debug(" ReceiveNewTopology: New topology information ");
@@ -1205,7 +1225,7 @@ void B4Mesh::ReceiveNewTopologyInfo(pair<string, vector<pair<int, Ipv4Address>>>
   //register last changement
   lastChange = natChange;
 
-  Simulator::Schedule(Seconds(5),
+  Simulator::Schedule(Seconds(1),
       &B4Mesh::UpdateTopologyInfo, this, change, new_group);
 }
 
@@ -1240,10 +1260,30 @@ void B4Mesh::UpdateTopologyInfo(uint32_t tmp_change, pair<string, vector<pair<in
 
         recover_branch.clear(); // Is this a problematic line? 
         startmergetime = Simulator::Now().GetSeconds();
-
+        debug("Merge has been started");
         startMerge = true; // For StartMerge() to proceed.
+        afterMerge=true;
       } else if (lastChange == SPLIT){
         debug(" UpdateTopologyInfo: This is a split change! ");
+        
+        // The following is all just for logging of convergence time.
+        // Get the ID of the last block in the common group
+        startsplittime=Simulator::Now().GetSeconds();
+        
+        vector<string> myChildless = blockgraph.GetChildlessBlockList();
+        string parentId = "";
+        for (auto &cb : myChildless){
+         parentId = cb;
+        }
+
+        debug_suffix << "FINAL BLOCK IN GROUP HAS HASH " << parentId;
+        debug(debug_suffix.str());
+
+        string groupId = blockgraph.GetGroupId(parentId);
+        debug_suffix << "GROUP ID OF THE FINAL BLOCK IS " << groupId;
+        debug(debug_suffix.str());
+
+        startGroupId = groupId;
       }
     } else {
       debug(" UpdateTopologyInfo: Topology is the same! No changes applied! ");

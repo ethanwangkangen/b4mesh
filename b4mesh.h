@@ -566,6 +566,11 @@ class B4Mesh : public Application{
     // map <double, pair<int, int>> mempool_info; // for traces propuses
     vector<pair<pair<double, int>, pair<int, float>>> mempool_info;
 
+    string startGroupId;
+    bool afterMerge;
+    double startsplittime;
+    
+
   private:
     // private member variables of blockgraph protocol 
     Ptr<Socket> recv_sock;

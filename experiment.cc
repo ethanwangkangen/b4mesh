@@ -73,9 +73,10 @@ Experiment::Experiment(int nNodes, int sTime, double timeBetweenTxn,
   CreateWifi(mLoss);
   CreateMobility(mMobility);
 	CreateAddresses();
-	CreateOracleConsensus();
-  CreateApplications();
-  CreateMobilityApplication();
+
+	CreateConsensus();      // Install Consensus module
+  CreateBlockgraph();         // Install Blockgraph module
+  CreateMobilityApplication();  // Install Group Discovery/mobility module
 
 }
 
@@ -244,7 +245,7 @@ void Experiment::CreateAddresses(){
 
 }
 
-void Experiment::CreateOracleConsensus(){
+void Experiment::CreateConsensus(){
 
 	consensus_oracle_traces = vector<B4MTraces>(nodes.GetN());
 	B4MeshOracleHelper consensus_oracle_Helper(&consensus_oracle_traces);
@@ -255,7 +256,7 @@ void Experiment::CreateOracleConsensus(){
 
 }
 
-void Experiment::CreateApplications(){
+void Experiment::CreateBlockgraph(){
 
   B4MeshHelper b4meshHelper(&b4mesh_traces);
   b4mesh_apps = b4meshHelper.Install(nodes, timeBetweenTxn);

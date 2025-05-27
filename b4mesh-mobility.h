@@ -104,7 +104,7 @@ class B4MeshMobility : public Application{
     /**
      * This fucntion decides whether to apply a change inmediatly or to wait for a more stable topology
      */ 
-    void CheckGroupChangement(vector<pair<int, Ipv4Address>> groupCandidate);
+    void CheckGroupChange(vector<pair<int, Ipv4Address>> groupCandidate);
 
     /**
      * Apply a change in the network topology
@@ -119,7 +119,7 @@ class B4MeshMobility : public Application{
     /**
      * Return the type of group change related to the current configuration
      */
-    int DetecteNatureChange(vector<pair<int, Ipv4Address>> oldgroup, vector<pair<int, Ipv4Address>> newgroup );
+    int DetectNatureChange(vector<pair<int, Ipv4Address>> oldgroup, vector<pair<int, Ipv4Address>> newgroup );
 
     /**
      * Returns false if the difference between nodes in group
