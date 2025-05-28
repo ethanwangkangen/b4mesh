@@ -94,7 +94,7 @@ vector<string> Blockgraph::GetChildren (Block &block){
   vector <string> children = vector<string> ();
 
   for (auto& b : blocks){
-    if (block.IsChild(b.second))
+    if (b.second.IsChild(block))
       children.push_back(b.first);
   }
   return children;

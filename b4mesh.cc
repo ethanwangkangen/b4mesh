@@ -1091,22 +1091,41 @@ void B4Mesh::AddBlockToBlockgraph(Block b){
 
   // For convergence time logging
   vector<string> parentHashes = b.GetParents();
-  string h;
+  string parentHash;
   for (auto &hash : parentHashes){
     string groupId = blockgraph.GetGroupId(hash);
-    h = hash;
+    parentHash = hash;
   }
+  Block parentBlock = blockgraph.GetBlock(parentHash);
+  vector<string> parentChildren = blockgraph.GetChildren(parentBlock);
 
-  if (groupId == startGroupId && afterMerge == true && blockgraph.GetBlock(h).GetTimestamp() < startsplittime
-      && blockgraph.GetBlock(h).GetTimestamp() != -1){
+  // If parent has more than one child
+  // if (groupId == startGroupId && afterMerge == true && blockgraph.GetBlock(parentHash).GetTimestamp() < startsplittime
+  if (parentChildren.size() > 1 && blockgraph.GetBlock(parentHash).GetTimestamp() < startsplittime
+      && blockgraph.GetBlock(parentHash).GetTimestamp() != -1){
     endmergetime = Simulator::Now().GetSeconds();
-    afterMerge=false;
+
+    cout << "parent is" << parentHash;
+    for (string& child : parentChildren) {
+      cout << "child " <<child << endl;
+    }
+
     debug("Merge has been completed");
-    debug_suffix << blockgraph.GetBlock(h).GetTimestamp() << " " <<startsplittime;
+    debug_suffix << blockgraph.GetBlock(parentHash).GetTimestamp() << " " <<startsplittime;
     debug(debug_suffix.str());
   }
+
+  // if (parentChildren.size() > 1 && blockgraph.GetBlock(parentHash).GetTimestamp() < startsplittime
+  //     && blockgraph.GetBlock(parentHash).GetTimestamp() != -1){
+  //   endmergetime = Simulator::Now().GetSeconds();
+
+  //   debug("Merge has been completed");
+  //   debug_suffix << blockgraph.GetBlock(parentHash).GetTimestamp() << " " <<startsplittime;
+  //   debug(debug_suffix.str());
+  // }
   
   CreateGraph(b);
+
 }
 
 /**
