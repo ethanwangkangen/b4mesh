@@ -522,6 +522,8 @@ class B4Mesh : public Application{
 
     void CourseChange(string context, Ptr<const MobilityModel> mobility);
 
+    void ContinuousResults();
+
   public:
     /* Traces for B4Mesh App */
     float p_b_t_t; // Processing block treatment time
@@ -569,6 +571,9 @@ class B4Mesh : public Application{
     string startGroupId;
     bool afterMerge;
     double startsplittime;
+
+
+    double lastContinuousTime = 0.0;
     
 
   private:
