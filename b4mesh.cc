@@ -175,10 +175,9 @@ void B4Mesh::RecurrentSampling(){
   double now = Simulator::Now().GetSeconds();
 
   if (now - lastContinuousTime >= 200.0) {
-    ContinuousResults();
     lastContinuousTime = now;
 
-    if (node->GetId() == 0) {
+    if (true) {
       
       ofstream output_file11;
       char filename11[50];
@@ -186,10 +185,13 @@ void B4Mesh::RecurrentSampling(){
       output_file11.open(filename11, ios::app);
       output_file11 << std::fixed << std::setprecision(2);
 
-      output_file11 << lastContinuousTime;
-
-      
+      output_file11 << "\n";
+      output_file11 << "Data at "<< lastContinuousTime;
+      output_file11 << "\n";
+      output_file11 << "\n";
       output_file11.close();
+
+      ContinuousResults();
 
     }
   }
@@ -197,8 +199,6 @@ void B4Mesh::RecurrentSampling(){
   Simulator::Schedule(Seconds(SEC_5_TIMER), 
         &B4Mesh::RecurrentSampling, this);
 
-  Simulator::Schedule(Seconds(SEC_5_TIMER), 
-        &B4Mesh::RecurrentSampling, this);
 }
 
 /**
@@ -2466,6 +2466,7 @@ void B4Mesh::GenerateResults(){
 // Every 200 seconds
 
 void B4Mesh::ContinuousResults(){
+  
 
   ofstream output_file11;
   char filename11[50];
