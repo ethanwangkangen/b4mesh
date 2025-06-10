@@ -18,6 +18,7 @@ int main(int argc, char *argv[]) {
   int mLoss = 2;  // Loss propagation model 
   int nScen = 1;    // Number of scenario
   double speed = 2;  // Speed of the mobility model 
+  int runNum = 1;
 
 
   CommandLine cmd;
@@ -28,9 +29,10 @@ int main(int argc, char *argv[]) {
   cmd.AddValue("mLoss", "The propagation loss model use for this simulation\n1 = Friss Loss model\n2 = Range Loss model (default at 100m)\n3 = Log Distance Loss model\n4 = Fixed Loss model", mLoss);
   cmd.AddValue("nScen", "The mobility scenario choosen for this simulation\nwhen choosing a Constant Position Mobility model", nScen);
   cmd.AddValue("speed", "The velocity of the nodes in m/s", speed);
+  cmd.AddValue("runNum", "To change the random seen to inject variance", runNum);
   cmd.Parse (argc, argv);
 
-  Experiment e(nNodes, sTime, timeBetweenTxn, mMobility, mLoss,  nScen, speed);
+  Experiment e(nNodes, sTime, timeBetweenTxn, mMobility, mLoss,  nScen, speed, runNum);
   e.Run();
 
   return 0;

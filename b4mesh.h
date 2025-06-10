@@ -545,7 +545,8 @@ class B4Mesh : public Application{
     int numDumpingBlock; // The number of dumped blocks because either is alredy in the blockgraph or in the waiting list
     int numDumpingTxs; // The number of dumped txs because rither is already in blockgrap or in mempool
 
-    double sentPacketSizeTotal; // Total size of all packets sent
+    double sentPacketSizeTotal; // Total size of all packets sent, exclujding blocks
+    double blockPacketSizeTotal; // Total size of all blocks
     double sentTxnPacketSize; // Total size of all transaction packets sent
 
     double timeBetweenTxn;   // Mean time between transactions

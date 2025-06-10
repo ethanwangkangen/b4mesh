@@ -27,7 +27,7 @@ class Experiment{
 
     // Constructors and destructor
     Experiment(int nNodes, int sTime, double timeBetweenTxn, 
-               int mMobility, int mLoss, int nScen, double speed);
+               int mMobility, int mLoss, int nScen, double speed, int runNum);
     ~Experiment();
 
   public:
@@ -106,6 +106,7 @@ class Experiment{
     int mLoss;
     int nScen;
     double speed;
+    int runNum;
 
   public:
     /*

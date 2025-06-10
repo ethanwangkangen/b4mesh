@@ -7,7 +7,7 @@
 #define TX_MEAN_SIZE 40000
 
 // Minimum time to propagate a block before creating a new one
-#define TIME_BTW_BLOCK 40
+#define TIME_BTW_BLOCK 20
 
 // Number of transactions allowed in a block
 #define MAX_SIZE_BLOCK 100  // In KB
