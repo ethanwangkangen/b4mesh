@@ -156,6 +156,8 @@ void B4Mesh::RecurrentTasks(){
 
   Ask4MissingBlocks();
   //RetransmitTransactions();
+
+  
 }
 
 /**
@@ -170,8 +172,33 @@ void B4Mesh::RecurrentSampling(){
   MempoolSampling();
   TxsPerformances();
 
+  double now = Simulator::Now().GetSeconds();
+
+  if (now - lastContinuousTime >= 200.0) {
+    lastContinuousTime = now;
+
+    if (true) {
+      
+      ofstream output_file11;
+      char filename11[50];
+      sprintf(filename11, "Traces/Performances-Continuous.txt");
+      output_file11.open(filename11, ios::app);
+      output_file11 << std::fixed << std::setprecision(2);
+
+      output_file11 << "\n";
+      output_file11 << "Data at "<< lastContinuousTime;
+      output_file11 << "\n";
+      output_file11 << "\n";
+      output_file11.close();
+
+      ContinuousResults();
+
+    }
+  }
+
   Simulator::Schedule(Seconds(SEC_5_TIMER), 
         &B4Mesh::RecurrentSampling, this);
+
 }
 
 /**
@@ -2419,6 +2446,31 @@ void B4Mesh::GenerateResults(){
   ofstream output_file11;
   char filename11[50];
   sprintf(filename11, "Traces/Performances-total.txt");
+  output_file11.open(filename11, ios::app);
+  output_file11 << std::fixed << std::setprecision(2);
+
+  //output_file11 << "Node: " << node->GetId() << endl;
+  output_file11 << sentPacketSizeTotal << endl;
+  output_file11 << GetB4MeshOracle(node->GetId())->sentPacketSizeTotalConsensus << endl;
+  output_file11 << sentTxnPacketSize << endl;
+  if (endmergetime - startmergetime < 0) {
+    output_file11 << "0" << endl;
+  } else {
+    output_file11 << endmergetime - startmergetime << endl;
+   }
+  
+  output_file11.close();
+
+}
+
+// Every 200 seconds
+
+void B4Mesh::ContinuousResults(){
+  
+
+  ofstream output_file11;
+  char filename11[50];
+  sprintf(filename11, "Traces/Performances-Continuous.txt");
   output_file11.open(filename11, ios::app);
   output_file11 << std::fixed << std::setprecision(2);
 
