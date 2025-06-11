@@ -177,7 +177,6 @@ void B4Mesh::RecurrentSampling(){
   if (now - lastContinuousTime >= 200.0) {
     lastContinuousTime = now;
 
-    if (true) {
       
       ofstream output_file11;
       char filename11[50];
@@ -193,7 +192,6 @@ void B4Mesh::RecurrentSampling(){
 
       ContinuousResults();
 
-    }
   }
 
   Simulator::Schedule(Seconds(SEC_5_TIMER), 
