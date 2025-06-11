@@ -173,8 +173,11 @@ void B4MeshOracle::SendPacket(ApplicationPacket& packet, Ipv4Address ip, bool sc
   // Create the packet to send
    Ptr<Packet> pkt = Create<Packet>((const uint8_t*)(packet.Serialize().data()), packet.GetSize());
 
-  // Traces: Add by Ethan
-  sentPacketSizeTotalConsensus += pkt->GetSize();
+  if (packet.GetService() == ApplicationPacket::CONSENSUS && ExtractMessageType(packet.GetPayload()) == APPEND_ENTRY && packet.GetSize()>500){
+    blockPacketSizeTotal += packet.GetSize();
+  } else {
+    sentPacketSizeTotalConsensus += pkt->GetSize();
+  }
 
   // Open the sending socket
   TypeId tid = TypeId::LookupByName("ns3::UdpSocketFactory");

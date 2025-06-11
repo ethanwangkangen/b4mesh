@@ -177,7 +177,6 @@ void B4Mesh::RecurrentSampling(){
   if (now - lastContinuousTime >= 200.0) {
     lastContinuousTime = now;
 
-    if (true) {
       
       ofstream output_file11;
       char filename11[50];
@@ -193,7 +192,6 @@ void B4Mesh::RecurrentSampling(){
 
       ContinuousResults();
 
-    }
   }
 
   Simulator::Schedule(Seconds(SEC_5_TIMER), 
@@ -424,11 +422,16 @@ void B4Mesh::SendPacket(ApplicationPacket& packet, Ipv4Address ip, bool schedule
   //       &B4Mesh::SendPacket, this, packet, ip, true);
   //   return;
   // }
+  //
+
+  if (packet.GetService() == ApplicationPacket::BLOCK){
+    blockPacketSizeTotal += packet.GetSize();
+  } else {
+    sentPacketSizeTotal += packet.GetSize(); // In B
+  }
 
   Ptr<Packet> pkt = Create<Packet>((const uint8_t*)(packet.Serialize().data()), packet.GetSize());
 
-  // For tracing purposes: Ethan added
-  sentPacketSizeTotal += packet.GetSize(); // In B
 
 
   // Open the sending socket
@@ -2262,6 +2265,7 @@ void B4Mesh::StopApplication(){
     recv_sock->SetRecvCallback (MakeNullCallback<void, Ptr<Socket> > ());
     recv_sock = 0;
   }
+  
 
   GenerateResults();
   debug("GENERATING RESULTS");
@@ -2445,19 +2449,13 @@ void B4Mesh::GenerateResults(){
 
   ofstream output_file11;
   char filename11[50];
-  sprintf(filename11, "Traces/Performances-total.txt");
+  sprintf(filename11, "Traces/Timings.txt");
   output_file11.open(filename11, ios::app);
   output_file11 << std::fixed << std::setprecision(2);
 
-  //output_file11 << "Node: " << node->GetId() << endl;
-  output_file11 << sentPacketSizeTotal << endl;
-  output_file11 << GetB4MeshOracle(node->GetId())->sentPacketSizeTotalConsensus << endl;
-  output_file11 << sentTxnPacketSize << endl;
-  if (endmergetime - startmergetime < 0) {
-    output_file11 << "0" << endl;
-  } else {
-    output_file11 << endmergetime - startmergetime << endl;
-   }
+  output_file11 << "starting split at " << startsplittime << endl;
+  output_file11 << "starting merge at " << startmergetime << endl;
+
   
   output_file11.close();
 
@@ -2474,10 +2472,12 @@ void B4Mesh::ContinuousResults(){
   output_file11.open(filename11, ios::app);
   output_file11 << std::fixed << std::setprecision(2);
 
-  //output_file11 << "Node: " << node->GetId() << endl;
+  output_file11 << "Node: " << node->GetId() << endl;
+  output_file11 << "b4mesh blocks, oracle blocks, b4mesh msgs, consensus mgs, convergence time" << endl;
+  output_file11 << blockPacketSizeTotal << endl;
+  output_file11 << GetB4MeshOracle(node->GetId())->blockPacketSizeTotal << endl;
   output_file11 << sentPacketSizeTotal << endl;
   output_file11 << GetB4MeshOracle(node->GetId())->sentPacketSizeTotalConsensus << endl;
-  output_file11 << sentTxnPacketSize << endl;
   if (endmergetime - startmergetime < 0) {
     output_file11 << "0" << endl;
   } else {

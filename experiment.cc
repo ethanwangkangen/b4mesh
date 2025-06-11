@@ -1,7 +1,7 @@
 #include "experiment.h"
 
 Experiment::Experiment(int nNodes, int sTime, double timeBetweenTxn, 
-                         int mMobility, int mLoss, int nScen, double speed) {
+                         int mMobility, int mLoss, int nScen, double speed, int runNum) {
 
 	trace_dir = ".";
 
@@ -15,6 +15,7 @@ Experiment::Experiment(int nNodes, int sTime, double timeBetweenTxn,
   this->mLoss = mLoss;
 	this->nScen = nScen;
   this->speed = speed;
+  this->runNum = runNum;
 
 	cout << "RUN = "<< RngSeedManager::GetRun() << " --nNodes = " << nNodes;
 	cout << " --sTime = " << sTime << " --timeBetweenTxn = " << timeBetweenTxn;
@@ -275,6 +276,8 @@ void Experiment::CreateMobilityApplication(){
 }
 
 void Experiment::Run(){
+  RngSeedManager::SetSeed (12345);  // Optional: set custom seed
+  RngSeedManager::SetRun (runNum);
 
   Simulator::Stop(Seconds(sTime + 30));
   Simulator::Run();

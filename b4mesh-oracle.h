@@ -417,7 +417,8 @@ class B4MeshOracle : public Application{
 		pair<float, int> sent_messages;
 
 
-		double sentPacketSizeTotalConsensus; // Total size of all packets sent
+		double sentPacketSizeTotalConsensus; // Total size of all packets sent, except blocks
+		double blockPacketSizeTotal; // Total size of all packets sent (blocks)
 
 		B4MTraces* traces;
 		
