@@ -1,3 +1,64 @@
+Extract files into b4mesh folder. Put b4mesh folder into ../ns-allinone-3.44/ns-3.44/scratch/
+
+**********************************************************************************************************
+
+***** The directory <ns-allinone-3.44> and <ns-3.44> may differ depending on the version of ns3 downloaded
+
+**********************************************************************************************************
+
+ 
+
+Build the project
+
+To build the project with CMake: Start from top level ns3.44 folder.
+
+ 
+
+cd ../ns-3.44
+
+ 
+
+Configure the build
+
+ 
+
+cmake -B build
+
+ 
+
+OR from within the b4mesh folder,
+
+ 
+
+./build.sh
+
+******* This creates a ELF in ./ns-3-dev/build/scratch DIRECTORY ******
+
+******* This is the file that is run from run.sh *********************
+
+******* Take note of the 2 directories:  ./scratch and ./build/scratch
+
+ 
+
+ 
+
+Compile and execute b4mesh simulation
+
+Then run the script with
+
+ 
+
+./run.sh {arguments}
+
+***** The following line(in run.sh) may need to be changed based on the ELF file created
+
+****** sudo ../../build/scratch/b4mesh/./ns3-dev-main-default  "$@" > traces.txt
+
+****** ns3-dev-main-default is the ELF file created in ./ns-3-dev/build/scratch/b4mesh
+
+
+
+
 ## Acknowledgements
 
 This repository is based on the Blockgraph/Consensus4Mesh(C4M) protocol designed by David Mordova. [https://gitlab.lip6.fr/cordova/b4mesh] and [https://gitlab.lip6.fr/cordova/c4m].
